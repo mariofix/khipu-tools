@@ -4,6 +4,18 @@
 
 Este proyecto está en desarrollo activo. Las funcionalidades y API pueden cambiar sin previo aviso.
 
+![PyPI - Status](https://img.shields.io/pypi/status/khipu-tools)
+[![Tests&Coverage](https://github.com/mariofix/khipu-tools/actions/workflows/tests_coverage.yml/badge.svg?branch=main)](https://github.com/mariofix/khipu-tools/actions/workflows/tests_coverage.yml)
+[![Downloads](https://pepy.tech/badge/khipu-tools)](https://pepy.tech/project/khipu-tools)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/7f6ca2bad320445f954862dc119091aa)](https://app.codacy.com/gh/mariofix/khipu-tools/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
+[![Codacy Badge](https://app.codacy.com/project/badge/Coverage/7f6ca2bad320445f954862dc119091aa)](https://app.codacy.com/gh/mariofix/khipu-tools/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_coverage)
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/mariofix/khipu-tools/main.svg)](https://results.pre-commit.ci/latest/github/mariofix/khipu-tools/main)
+![PyPI](https://img.shields.io/pypi/v/khipu-tools)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/khipu-tools)
+![PyPI - Implementation](https://img.shields.io/pypi/implementation/khipu-tools)
+![PyPI - License](https://img.shields.io/pypi/l/khipu-tools)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
 ## Descripción
 
 Khipu Tools es una librería en Python pensada para que integrar los servicios de Khipu en tus proyectos sea sencillo y directo. Ideal para gestionar transacciones y pagos desde tu código.
@@ -62,10 +74,6 @@ Salida esperada:
 }
 ```
 
-## Documentación Completa
-
-Próximamente se incluirá una documentación más extensa sobre todas las funcionalidades disponibles.
-
 ## Contribuciones
 
 ¡Las contribuciones son bienvenidas! Por favor, sigue estos pasos:
@@ -77,7 +85,4 @@ Próximamente se incluirá una documentación más extensa sobre todas las funci
 ## Licencia
 
 Este proyecto está licenciado bajo la [MIT License](LICENSE).
-
----
-
 Este proyecto no está patrocinado ni asociado con Khipu.
