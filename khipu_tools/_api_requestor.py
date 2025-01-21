@@ -110,12 +110,12 @@ class _APIRequestor:
 
     @classmethod
     def _format_app_info(cls, info):
-        str = info["name"]
+        str_info = info["name"]
         if info["version"]:
-            str += "/{}".format(info["version"])
+            str_info += "/{}".format(info["version"])
         if info["url"]:
-            str += " ({})".format(info["url"])
-        return str
+            str_info += " ({})".format(info["url"])
+        return str_info
 
     def request(
         self,
