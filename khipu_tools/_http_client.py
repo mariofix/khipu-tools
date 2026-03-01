@@ -2,45 +2,42 @@ import random
 import textwrap
 import threading
 from collections.abc import Mapping
-from typing import Any, ClassVar, NoReturn, Optional, Union, cast, overload
+from typing import Any, ClassVar, Literal, NoReturn, TypedDict, cast, overload
 
 import requests
 from requests import Session as RequestsSession
-from typing import Literal, TypedDict
 from typing_extensions import Never
 from khipu_tools._error import APIConnectionError
 
 
-def new_default_http_client(*args: Any, **kwargs: Any) -> "HTTPClient":
-    impl = RequestsClient
-    return impl(*args, **kwargs)
+def new_default_http_client(**kwargs: Any) -> "HTTPClient":
+    return RequestsClient(**kwargs)
 
 
-def new_http_client_async_fallback(*args: Any, **kwargs: Any) -> "HTTPClient":
-    impl = NoImportFoundAsyncClient
-    return impl(*args, **kwargs)
+def new_http_client_async_fallback(**kwargs: Any) -> "HTTPClient":
+    return NoImportFoundAsyncClient(**kwargs)
 
 
 class HTTPClient:
     name: ClassVar[str]
 
     class _Proxy(TypedDict):
-        http: Optional[str]
-        https: Optional[str]
+        http: str | None
+        https: str | None
 
     MAX_DELAY = 5
     INITIAL_DELAY = 0.5
     MAX_RETRY_AFTER = 60
-    _proxy: Optional[_Proxy]
+    _proxy: "_Proxy | None"
     _verify_ssl_certs: bool
 
     def __init__(
         self,
         verify_ssl_certs: bool = True,
-        proxy: Optional[Union[str, _Proxy]] = None,
-        async_fallback_client: Optional["HTTPClient"] = None,
+        proxy: "str | HTTPClient._Proxy | None" = None,
+        async_fallback_client: "HTTPClient | None" = None,
     ):
-        self._verify_ssl_certs = False
+        self._verify_ssl_certs = verify_ssl_certs
 
         self._proxy = None
         self._async_fallback_client = async_fallback_client
@@ -54,13 +51,13 @@ class HTTPClient:
     ):
         return False
 
-    def _retry_after_header(self, response: Optional[tuple[Any, Any, Mapping[str, str]]] = None):
+    def _retry_after_header(self, response: tuple[Any, Any, Mapping[str, str]] | None = None):
         return None
 
     def _sleep_time_seconds(
         self,
         num_retries: int,
-        response: Optional[tuple[Any, Any, Mapping[str, str]]] = None,
+        response: tuple[Any, Any, Mapping[str, str]] | None = None,
     ) -> float:
         """
         Apply exponential backoff with initial_network_retry_delay on the number of num_retries so far as inputs.
@@ -130,10 +127,8 @@ class HTTPClient:
         self,
         method: str,
         url: str,
-        headers: Optional[Mapping[str, str]],
+        headers: Mapping[str, str] | None,
         post_data: Any = None,
-        *,
-        _usage: Optional[list[str]] = None,
     ) -> tuple[str, int, Mapping[str, str]]:
         raise NotImplementedError("HTTPClient subclasses must implement `request`")
 
@@ -147,10 +142,10 @@ class RequestsClient(HTTPClient):
     def __init__(
         self,
         timeout: int = 80,
-        session: Optional["RequestsSession"] = None,
+        session: "RequestsSession | None" = None,
         verify_ssl_certs: bool = True,
-        proxy: Optional[Union[str, HTTPClient._Proxy]] = None,
-        async_fallback_client: Optional[HTTPClient] = None,
+        proxy: "str | HTTPClient._Proxy | None" = None,
+        async_fallback_client: "HTTPClient | None" = None,
         **kwargs,
     ):
         super().__init__(
@@ -168,7 +163,7 @@ class RequestsClient(HTTPClient):
         self,
         method: str,
         url: str,
-        headers: Optional[Mapping[str, str]],
+        headers: Mapping[str, str] | None,
         post_data=None,
     ) -> tuple[bytes, int, Mapping[str, str]]:
         return self._request_internal(method, url, headers, post_data, is_streaming=False)
@@ -177,7 +172,7 @@ class RequestsClient(HTTPClient):
         self,
         method: str,
         url: str,
-        headers: Optional[Mapping[str, str]],
+        headers: Mapping[str, str] | None,
         post_data=None,
     ) -> tuple[Any, int, Mapping[str, str]]:
         return self._request_internal(method, url, headers, post_data, is_streaming=True)
@@ -187,7 +182,7 @@ class RequestsClient(HTTPClient):
         self,
         method: str,
         url: str,
-        headers: Optional[Mapping[str, str]],
+        headers: Mapping[str, str] | None,
         post_data,
         is_streaming: Literal[True],
     ) -> tuple[Any, int, Mapping[str, str]]: ...
@@ -197,7 +192,7 @@ class RequestsClient(HTTPClient):
         self,
         method: str,
         url: str,
-        headers: Optional[Mapping[str, str]],
+        headers: Mapping[str, str] | None,
         post_data,
         is_streaming: Literal[False],
     ) -> tuple[bytes, int, Mapping[str, str]]: ...
@@ -206,15 +201,12 @@ class RequestsClient(HTTPClient):
         self,
         method: str,
         url: str,
-        headers: Optional[Mapping[str, str]],
+        headers: Mapping[str, str] | None,
         post_data,
         is_streaming: bool,
-    ) -> tuple[Union[bytes, Any], int, Mapping[str, str]]:
+    ) -> tuple[bytes | Any, int, Mapping[str, str]]:
         kwargs = {}
-        if self._verify_ssl_certs:
-            kwargs["verify"] = True
-        else:
-            kwargs["verify"] = True
+        kwargs["verify"] = self._verify_ssl_certs
 
         if self._proxy:
             kwargs["proxies"] = self._proxy
@@ -238,11 +230,10 @@ class RequestsClient(HTTPClient):
             except TypeError as e:
                 raise TypeError(
                     "Warning: It looks like your installed version of the "
-                    '"requests" library is not compatible with Stripe\'s '
-                    "usage thereof. (HINT: The most likely cause is that "
-                    'your "requests" library is out of date. You can fix '
-                    'that by running "pip install -U requests".) The '
-                    "underlying error was: %s" % (e,)
+                    '"requests" library is not compatible with khipu-tools. '
+                    "(HINT: The most likely cause is that your \"requests\" "
+                    'library is out of date. You can fix that by running '
+                    '"pip install -U requests".) The underlying error was: %s' % (e,)
                 )
 
             if is_streaming:

@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 
 from khipu_tools._api_mode import ApiMode
 from khipu_tools._khipu_object import KhipuObject
@@ -6,16 +6,10 @@ from khipu_tools._util import merge_dicts
 
 
 class ErrorObject(KhipuObject):
-    charge: Optional[str]
-    code: Optional[str]
-    decline_code: Optional[str]
-    doc_url: Optional[str]
-    message: Optional[str]
-    param: Optional[str]
-    payment_intent: Optional[Any]
-    payment_method: Optional[Any]
-    setup_intent: Optional[Any]
-    source: Optional[Any]
+    code: str | None
+    doc_url: str | None
+    message: str | None
+    param: str | None
     type: str
 
     def refresh_from(
@@ -54,7 +48,6 @@ class ErrorObject(KhipuObject):
                 "doc_url": None,
                 "message": None,
                 "param": None,
-                "source": None,
                 "type": None,
             },
             values,

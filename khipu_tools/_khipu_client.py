@@ -1,4 +1,4 @@
-from typing import Any, Optional, Union
+from typing import Any
 
 import khipu_tools
 from khipu_tools._api_mode import ApiMode
@@ -22,21 +22,21 @@ class KhipuClient:
         self,
         api_key: str,
         *,
-        base_addresses: BaseAddresses = {},
-        http_client: Optional[HTTPClient] = None,
+        base_addresses: BaseAddresses | None = None,
+        http_client: HTTPClient | None = None,
     ):
 
         if api_key is None:
             raise AuthenticationError("No API key provided.")
 
-        base_addresses = {
+        resolved_addresses: BaseAddresses = {
             "api": khipu_tools.DEFAULT_API_BASE,
-            **base_addresses,
+            **(base_addresses or {}),
         }
 
         requestor_options = RequestorOptions(
             api_key=api_key,
-            base_addresses=base_addresses,
+            base_addresses=resolved_addresses,
         )
 
         if http_client is None:
@@ -71,8 +71,8 @@ class KhipuClient:
 
     def deserialize(
         self,
-        resp: Union[KhipuResponse, dict[str, Any]],
-        params: Optional[dict[str, Any]] = None,
+        resp: KhipuResponse | dict[str, Any],
+        params: dict[str, Any] | None = None,
         *,
         api_mode: ApiMode,
     ) -> KhipuObject:

@@ -1,5 +1,5 @@
 from decimal import Decimal
-from typing import ClassVar, Optional, TypeVar
+from typing import ClassVar, TypeVar
 
 from typing import Literal
 from typing_extensions import Unpack
@@ -26,49 +26,49 @@ class Payments(APIResource[T]):
         """El código de moneda en formato ISO-4217."""
         subject: str
         """Motivo."""
-        transaction_id: Optional[str]
+        transaction_id: str | None
         """Identificador propio de la transacción. Ej: número de factura u orden de compra."""
-        custom: Optional[str]
+        custom: str | None
         """Parámetro para enviar información personalizada de la transacción. Ej: documento XML con el detalle del carro de compra."""
-        body: Optional[str]
+        body: str | None
         """Descripción del cobro."""
-        bank_id: Optional[str]
+        bank_id: str | None
         """Identificador del banco para usar en el pago."""
-        return_url: Optional[str]
+        return_url: str | None
         """La dirección URL a donde enviar al cliente mientras el pago está siendo verificado."""
-        cancel_url: Optional[str]
+        cancel_url: str | None
         """La dirección URL a donde enviar al cliente si decide no hacer hacer la transacción."""
-        picture_url: Optional[str]
+        picture_url: str | None
         """Una dirección URL de una foto de tu producto o servicio."""
-        notify_url: Optional[str]
+        notify_url: str | None
         """La dirección del web-service que utilizará khipu para notificar cuando el pago esté conciliado."""
-        contract_url: Optional[str]
+        contract_url: str | None
         """La dirección URL del archivo PDF con el contrato a firmar mediante este pago. El cobrador debe estar habilitado para este servicio y el campo fixed_payer_personal_identifier es obligatorio."""
         notify_api_version: Literal["3.0"]
         """Versión de la API de notificaciones para recibir avisos por web-service. Solo está soportada la version 3.0. para versiones anteriores pyeden usar la libreria pykhipu"""
-        expires_date: Optional[str]
+        expires_date: str | None
         """Fecha máxima para ejecutar el pago (en formato ISO-8601). El cliente podrá realizar varios intentos de pago hasta dicha fecha. Cada intento tiene un plazo individual de 3 horas para su ejecución."""
-        send_email: Optional[bool]
+        send_email: bool | None
         """Si es True, se enviará una solicitud de cobro al correo especificado en payer_email."""
-        payer_name: Optional[str]
+        payer_name: str | None
         """Nombre del pagador. Es obligatorio cuando send_email es true."""
-        payer_email: Optional[str]
+        payer_email: str | None
         """Correo del pagador. Es obligatorio cuando send_email es true."""
-        send_reminders: Optional[bool]
+        send_reminders: bool | None
         """Si es true, se enviarán recordatorios de cobro."""
-        responsible_user_email: Optional[str]
+        responsible_user_email: str | None
         """Correo electrónico del responsable de este cobro, debe corresponder a un usuario Khipu con permisos para cobrar usando esta cuenta de cobro."""
-        fixed_payer_personal_identifier: Optional[str]
+        fixed_payer_personal_identifier: str | None
         """Identificador personal. Si se especifica, solo podrá ser pagado usando ese identificador."""
-        integrator_fee: Optional[str]
+        integrator_fee: str | None
         """Comisión para el integrador. Sólo es válido si la cuenta de cobro tiene una cuenta de integrador asociada."""
-        collect_account_uuid: Optional[str]
+        collect_account_uuid: str | None
         """Para cuentas de cobro con más cuenta propia. Permite elegir la cuenta donde debe ocurrir la transferencia."""
-        confirm_timeout_date: Optional[str]
+        confirm_timeout_date: str | None
         """Fecha de rendición del cobro. Es también la fecha final para poder reembolsar el cobro. Formato ISO-8601."""
-        mandatory_payment_method: Optional[str]
+        mandatory_payment_method: str | None
         """El cobro sólo se podrá pagar utilizando el medio de pago especificado. Los posibles valores para este campo se encuentran en el campo id de la respuesta del endpoint /api/3.0/merchants/paymentMethods."""
-        psp_client_merchant_name: Optional[str]
+        psp_client_merchant_name: str | None
         """Nombre del comercio final para quien un proveedor de servicios de pago procesa un pago. Requerido para transacciones de clientes PSP; no aplicable para otros."""
 
     class PaymentCreateResponse(KhipuObject):

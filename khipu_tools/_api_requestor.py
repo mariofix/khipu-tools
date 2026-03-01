@@ -1,6 +1,6 @@
 import json
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, ClassVar, Optional, cast
+from typing import TYPE_CHECKING, Any, ClassVar, cast
 from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 
 from typing import Literal
@@ -33,7 +33,7 @@ if TYPE_CHECKING:
 HttpVerb = Literal["get", "post", "delete"]
 
 # Lazily initialized
-_default_proxy: Optional[str] = None
+_default_proxy: str | None = None
 
 
 class _APIRequestor:
@@ -41,8 +41,8 @@ class _APIRequestor:
 
     def __init__(
         self,
-        options: Optional[RequestorOptions] = None,
-        client: Optional[HTTPClient] = None,
+        options: "RequestorOptions | None" = None,
+        client: "HTTPClient | None" = None,
     ):
         if options is None:
             options = RequestorOptions()
@@ -55,13 +55,8 @@ class _APIRequestor:
             global _default_proxy
 
             if not khipu_tools.default_http_client:
-                kwargs = {
-                    "verify_ssl_certs": False,
-                    "proxy": None,
-                }
                 khipu_tools.default_http_client = new_default_http_client(
-                    async_fallback_client=new_http_client_async_fallback(**kwargs),
-                    **kwargs,
+                    async_fallback_client=new_http_client_async_fallback(),
                 )
                 _default_proxy = None
             elif None is not _default_proxy:
@@ -78,7 +73,7 @@ class _APIRequestor:
             return khipu_tools.default_http_client
         return client
 
-    def _replace_options(self, options: Optional[RequestOptions]) -> "_APIRequestor":
+    def _replace_options(self, options: RequestOptions | None) -> "_APIRequestor":
         options = options or {}
         new_options = self._options.to_dict()
         for key in [
@@ -121,8 +116,8 @@ class _APIRequestor:
         self,
         method: str,
         url: str,
-        params: Optional[Mapping[str, Any]] = None,
-        options: Optional[RequestOptions] = None,
+        params: Mapping[str, Any] | None = None,
+        options: "RequestOptions | None" = None,
         *,
         base_address: BaseAddress,
     ) -> "KhipuObject":
@@ -164,8 +159,8 @@ class _APIRequestor:
         self,
         method: str,
         url: str,
-        params: Optional[Mapping[str, Any]] = None,
-        options: Optional[RequestOptions] = None,
+        params: Mapping[str, Any] | None = None,
+        options: "RequestOptions | None" = None,
         *,
         base_address: BaseAddress,
         api_mode: ApiMode,
@@ -237,7 +232,6 @@ class _APIRequestor:
             post_data = None
         elif method == "post":
             post_data = encoded_body
-            print(f"_api_requestor.py:399> {post_data=}")
         else:
             raise error.APIConnectionError(f"Unrecognized HTTP method {method!r}.")
 
@@ -260,8 +254,8 @@ class _APIRequestor:
         self,
         method: str,
         url: str,
-        params: Optional[Mapping[str, Any]] = None,
-        options: Optional[RequestOptions] = None,
+        params: Mapping[str, Any] | None = None,
+        options: "RequestOptions | None" = None,
         *,
         base_address: BaseAddress,
         api_mode: ApiMode,
@@ -315,7 +309,7 @@ class _APIRequestor:
                 rcode,
                 rheaders,
             )
-        except Exception:
+        except (json.JSONDecodeError, ValueError):
             raise error.APIError(
                 f"Invalid response body from API: {rcode} -- " f"HTTP response  was: {rbody})",
                 cast(bytes, rbody),

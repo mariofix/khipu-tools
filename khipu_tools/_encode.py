@@ -1,7 +1,6 @@
 import calendar
 import datetime
 import time
-from collections import OrderedDict
 from collections.abc import Generator
 from typing import Any, Optional
 
@@ -16,7 +15,7 @@ def _encode_datetime(dttime: datetime.datetime):
 
 
 def _encode_nested_dict(key, data, fmt="%s[%s]"):
-    d = OrderedDict()
+    d = {}
     for subkey, subvalue in data.items():
         d[fmt % (key, subkey)] = subvalue
     return d
