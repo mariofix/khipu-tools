@@ -1,6 +1,8 @@
-import random
+import secrets
 import textwrap
 import threading
+
+_system_random = secrets.SystemRandom()
 from collections.abc import Mapping
 from typing import Any, ClassVar, Literal, NoReturn, TypedDict, cast, overload
 
@@ -85,7 +87,7 @@ class HTTPClient:
         Randomize the value in `[(sleep_seconds/ 2) to (sleep_seconds)]`.
         Also separated method here to isolate randomness for tests
         """
-        sleep_seconds *= 0.5 * (1 + random.uniform(0, 1))
+        sleep_seconds *= 0.5 * (1 + _system_random.uniform(0, 1))
         return sleep_seconds
 
     def request_with_retries(
@@ -120,7 +122,8 @@ class HTTPClient:
         if response is not None:
             return response
         else:
-            assert connection_error is not None
+            if connection_error is None:
+                raise APIConnectionError("Unknown connection error occurred.")
             raise connection_error
 
     def request(
@@ -156,7 +159,6 @@ class RequestsClient(HTTPClient):
         self._session = session
         self._timeout = timeout
 
-        assert requests is not None
         self.requests = requests
 
     def request(
