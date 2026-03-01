@@ -150,11 +150,10 @@ class KhipuObject(dict[str, Any]):
     def __setitem__(self, k: str, v: Any) -> None:
         if v == "":
             raise ValueError(
-                "You cannot set %s to an empty string on this object. "
+                f"You cannot set {k} to an empty string on this object. "
                 "The empty string is treated specially in our requests. "
-                "If you'd like to delete the property using the save() method on this object, you may set %s.%s=None. "
-                "Alternatively, you can pass %s='' to delete the property when using a resource method such as modify()."
-                % (k, str(self), k, k)
+                f"If you'd like to delete the property using the save() method on this object, you may set {self!s}.{k}=None. "
+                f"Alternatively, you can pass {k}='' to delete the property when using a resource method such as modify()."
             )
 
         # Allows for unpickling in Python 3.x
@@ -171,11 +170,11 @@ class KhipuObject(dict[str, Any]):
         except KeyError as err:
             if k in self._transient_values:
                 raise KeyError(
-                    "%r.  HINT: The %r attribute was set in the past."
+                    f"{k!r}.  HINT: The {k!r} attribute was set in the past."
                     "It was then wiped when refreshing the object with "
                     "the result returned by Khipu's API, probably as a "
                     "result of a save().  The attributes currently "
-                    "available on this object are: %s" % (k, k, ", ".join(list(self.keys())))
+                    f"available on this object are: {', '.join(list(self.keys()))}"
                 )
             else:
                 raise err
@@ -375,13 +374,9 @@ class KhipuObject(dict[str, Any]):
             ident_parts.append(obj_str)
 
         if isinstance(self.get("id"), str):
-            ident_parts.append("id={}".format(self.get("id")))
+            ident_parts.append(f"id={self.get('id')}")
 
-        unicode_repr = "<{} at {}> JSON: {}".format(
-            " ".join(ident_parts),
-            hex(id(self)),
-            str(self),
-        )
+        unicode_repr = f"<{' '.join(ident_parts)} at {hex(id(self))}> JSON: {self!s}"
         return unicode_repr
 
     def __str__(self) -> str:

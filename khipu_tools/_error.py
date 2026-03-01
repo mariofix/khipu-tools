@@ -25,7 +25,7 @@ class KhipuError(Exception):
     ):
         super().__init__(message)
 
-        body: Optional[str] = None
+        body: str | None = None
         if http_body:
             # http_body can sometimes be a memoryview which must be cast
             # to a "bytes" before calling decode, so we check for the
@@ -63,11 +63,9 @@ class KhipuError(Exception):
         return self._message
 
     def __repr__(self):
-        return "{}(message={!r}, http_status={!r}, request_id={!r})".format(
-            self.__class__.__name__,
-            self._message,
-            self.http_status,
-            self.request_id,
+        return (
+            f"{self.__class__.__name__}(message={self._message!r},"
+            f" http_status={self.http_status!r}, request_id={self.request_id!r})"
         )
 
     def _construct_error_object(self) -> "ErrorObject | None":
@@ -110,13 +108,9 @@ class APIConnectionError(KhipuError):
 
 class KhipuErrorWithParamCode(KhipuError):
     def __repr__(self):
-        return "%s(message=%r, param=%r, code=%r, http_status=%r, request_id=%r)" % (
-            self.__class__.__name__,
-            self._message,
-            self.param,  # pyright: ignore
-            self.code,
-            self.http_status,
-            self.request_id,
+        return (
+            f"{self.__class__.__name__}(message={self._message!r}, param={self.param!r},"  # pyright: ignore
+            f" code={self.code!r}, http_status={self.http_status!r}, request_id={self.request_id!r})"
         )
 
 

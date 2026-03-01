@@ -231,9 +231,9 @@ class RequestsClient(HTTPClient):
                 raise TypeError(
                     "Warning: It looks like your installed version of the "
                     '"requests" library is not compatible with khipu-tools. '
-                    "(HINT: The most likely cause is that your \"requests\" "
-                    'library is out of date. You can fix that by running '
-                    '"pip install -U requests".) The underlying error was: %s' % (e,)
+                    '(HINT: The most likely cause is that your "requests" '
+                    "library is out of date. You can fix that by running "
+                    f'"pip install -U requests".) The underlying error was: {e}'
                 )
 
             if is_streaming:

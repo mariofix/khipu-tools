@@ -190,7 +190,7 @@ class Payments(APIResource[T]):
             params=params,
         )
         if not isinstance(result, KhipuObject):
-            raise TypeError("Expected KhipuObject object from API, got %s" % (type(result).__name__))
+            raise TypeError(f"Expected KhipuObject object from API, got {type(result).__name__}")
 
         return result
 
@@ -204,7 +204,7 @@ class Payments(APIResource[T]):
             f"{cls.class_url()}/{params['payment_id']}",
         )
         if not isinstance(result, KhipuObject):
-            raise TypeError("Expected KhipuObject object from API, got %s" % (type(result).__name__))
+            raise TypeError(f"Expected KhipuObject object from API, got {type(result).__name__}")
 
         return result
 
@@ -232,6 +232,6 @@ class Payments(APIResource[T]):
             params=params,
         )
         if not isinstance(result, KhipuObject):
-            raise TypeError("Expected KhipuObject object from API, got %s" % (type(result).__name__))
+            raise TypeError(f"Expected KhipuObject object from API, got {type(result).__name__}")
 
         return result

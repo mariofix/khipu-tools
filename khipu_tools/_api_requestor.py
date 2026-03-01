@@ -107,9 +107,9 @@ class _APIRequestor:
     def _format_app_info(cls, info):
         str_info = info["name"]
         if info["version"]:
-            str_info += "/{}".format(info["version"])
+            str_info += f"/{info['version']}"
         if info["url"]:
-            str_info += " ({})".format(info["url"])
+            str_info += f" ({info['url']})"
         return str_info
 
     def request(
@@ -173,10 +173,7 @@ class _APIRequestor:
         if request_options.get("api_key") is None:
             raise error.AuthenticationError("No API key provided.")
 
-        abs_url = "{}{}".format(
-            self._options.base_addresses.get(base_address),
-            url,
-        )
+        abs_url = f"{self._options.base_addresses.get(base_address)}{url}"
 
         params = params or {}
         if params and (method == "get" or method == "delete"):
