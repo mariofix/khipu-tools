@@ -230,7 +230,7 @@ class KhipuObject(dict[str, Any]):
         *,
         values: dict[str, Any],
         last_response: KhipuResponse | None = None,
-        requestor: "_APIRequestor",
+        requestor: _APIRequestor,
         api_mode: ApiMode,
     ) -> Self:
         instance = cls(
@@ -273,7 +273,7 @@ class KhipuObject(dict[str, Any]):
         values: dict[str, Any],
         partial: bool | None = False,
         last_response: KhipuResponse | None = None,
-        requestor: "_APIRequestor" | None = None,
+        requestor: _APIRequestor | None = None,
         api_mode: ApiMode,
     ) -> None:
         self._requestor = requestor or self._requestor
@@ -335,7 +335,7 @@ class KhipuObject(dict[str, Any]):
         params: dict[str, Any] | None = None,
         *,
         base_address: BaseAddress = "api",
-    ) -> "KhipuObject":
+    ) -> KhipuObject:
         return KhipuObject._request(
             self,
             method,
@@ -352,7 +352,7 @@ class KhipuObject(dict[str, Any]):
         usage: list[str] | None = None,
         *,
         base_address: BaseAddress,
-    ) -> "KhipuObject":
+    ) -> KhipuObject:
         if params is None:
             params = self._retrieve_params
 
@@ -433,7 +433,7 @@ class KhipuObject(dict[str, Any]):
     # wholesale because some data that's returned from the API may not be valid
     # if it was set to be set manually. Here we override the class' copy
     # arguments so that we can bypass these possible exceptions on __setitem__.
-    def __copy__(self) -> "KhipuObject":
+    def __copy__(self) -> KhipuObject:
         copied = KhipuObject(
             self.get("id"),
             self.api_key,
@@ -453,7 +453,7 @@ class KhipuObject(dict[str, Any]):
     # wholesale because some data that's returned from the API may not be valid
     # if it was set to be set manually. Here we override the class' copy
     # arguments so that we can bypass these possible exceptions on __setitem__.
-    def __deepcopy__(self, memo: dict[int, Any]) -> "KhipuObject":
+    def __deepcopy__(self, memo: dict[int, Any]) -> KhipuObject:
         copied = self.__copy__()
         memo[id(self)] = copied
 
@@ -466,10 +466,10 @@ class KhipuObject(dict[str, Any]):
 
     _field_remappings: ClassVar[dict[str, str]] = {}
 
-    _inner_class_types: ClassVar[dict[str, type["KhipuObject"]]] = {}
+    _inner_class_types: ClassVar[dict[str, type[KhipuObject]]] = {}
     _inner_class_dicts: ClassVar[list[str]] = []
 
-    def _get_inner_class_type(self, field_name: str) -> type["KhipuObject"] | None:
+    def _get_inner_class_type(self, field_name: str) -> type[KhipuObject] | None:
         return self._inner_class_types.get(field_name)
 
     def _get_inner_class_is_beneath_dict(self, field_name: str):
