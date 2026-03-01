@@ -1,5 +1,5 @@
 from collections.abc import Mapping
-from typing import Any, Optional, TypedDict
+from typing import Any, TypedDict
 
 from typing_extensions import NotRequired
 
@@ -14,7 +14,7 @@ class RequestOptions(TypedDict):
 
 def merge_options(
     requestor: RequestorOptions,
-    request: Optional[RequestOptions],
+    request: RequestOptions | None,
 ) -> RequestOptions:
     if request is None:
         return {
@@ -31,7 +31,7 @@ def merge_options(
 
 
 def extract_options_from_dict(
-    d: Optional[Mapping[str, Any]],
+    d: Mapping[str, Any] | None,
 ) -> tuple[RequestOptions, dict[str, Any]]:
     if not d:
         return {}, {}

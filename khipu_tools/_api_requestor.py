@@ -121,7 +121,7 @@ class _APIRequestor:
         *,
         base_address: BaseAddress,
     ) -> "KhipuObject":
-        api_mode = get_api_mode(url)
+        api_mode = get_api_mode()
         requestor = self._replace_options(options)
         rbody, rcode, rheaders = requestor.request_raw(
             method.lower(),
@@ -202,7 +202,7 @@ class _APIRequestor:
                 **params,
             }
 
-        encoded_params = urlencode(list(_api_encode(params or {}, api_mode)))
+        encoded_params = urlencode(list(_api_encode(params or {})))
 
         # Don't use strict form encoding by changing the square bracket control
         # characters back to their literals. This is fine by the server, and

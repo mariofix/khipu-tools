@@ -51,8 +51,8 @@ class KhipuClient:
     def raw_request(self, method_: str, url_: str, **params):
         params = params.copy()
         options, params = extract_options_from_dict(params)
-        api_mode = get_api_mode(url_)
-        base_address = params.pop("api")
+        api_mode = get_api_mode()
+        base_address = params.pop("api", "api")
 
         rbody, rcode, rheaders = self._requestor.request_raw(
             method_,
@@ -61,7 +61,6 @@ class KhipuClient:
             options=options,
             base_address=base_address,
             api_mode=api_mode,
-            usage=["raw_request"],
         )
 
         return self._requestor._interpret_response(rbody, rcode, rheaders, api_mode)

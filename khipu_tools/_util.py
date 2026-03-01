@@ -214,5 +214,5 @@ def merge_dicts(x, y):
     return z
 
 
-def get_api_mode(url):
+def get_api_mode() -> "ApiMode":
     return "V3"

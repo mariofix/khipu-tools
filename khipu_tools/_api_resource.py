@@ -1,5 +1,5 @@
 from collections.abc import Mapping
-from typing import Any, ClassVar, Generic, Optional, TypeVar
+from typing import Any, ClassVar, Generic, TypeVar
 
 from khipu_tools._api_requestor import _APIRequestor
 from khipu_tools._base_address import BaseAddress
@@ -30,7 +30,7 @@ class APIResource(KhipuObject, Generic[T]):
         cls,
         method_,
         url_,
-        params: Optional[Mapping[str, Any]] = None,
+        params: Mapping[str, Any] | None = None,
         *,
         base_address: BaseAddress = "api",
     ):
