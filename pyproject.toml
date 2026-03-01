@@ -98,6 +98,9 @@ source = ["khipu_tools"]
 omit = ["*/tests/*"]
 branch = true
 
+[tool.bandit]
+exclude_dirs = ["tests"]
+
 [tool.pytest.ini_options]
 minversion = "6.0"
 addopts = "-vra"

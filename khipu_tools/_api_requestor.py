@@ -69,7 +69,8 @@ class _APIRequestor:
                     "configured with the proxy."
                 )
 
-            assert khipu_tools.default_http_client is not None
+            if khipu_tools.default_http_client is None:
+                raise RuntimeError("Failed to initialize default HTTP client.")
             return khipu_tools.default_http_client
         return client
 
