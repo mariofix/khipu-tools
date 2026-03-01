@@ -3,7 +3,6 @@ from typing import Any
 import khipu_tools
 from khipu_tools._api_mode import ApiMode
 from khipu_tools._api_requestor import _APIRequestor
-from khipu_tools._client_options import _ClientOptions
 from khipu_tools._error import AuthenticationError
 from khipu_tools._http_client import (
     HTTPClient,
@@ -48,8 +47,6 @@ class KhipuClient:
             options=requestor_options,
             client=http_client,
         )
-
-        self._options = _ClientOptions()
 
     def raw_request(self, method_: str, url_: str, **params):
         params = params.copy()
