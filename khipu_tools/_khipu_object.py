@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import datetime
 import json
 from collections.abc import Mapping
@@ -6,8 +8,6 @@ from typing import (
     TYPE_CHECKING,
     Any,
     ClassVar,
-    Optional,
-    Union,
     cast,
     overload,
 )
@@ -29,14 +29,14 @@ if TYPE_CHECKING:
 
 
 @overload
-def _compute_diff(current: dict[str, Any], previous: Optional[dict[str, Any]]) -> dict[str, Any]: ...
+def _compute_diff(current: dict[str, Any], previous: dict[str, Any] | None) -> dict[str, Any]: ...
 
 
 @overload
-def _compute_diff(current: object, previous: Optional[dict[str, Any]]) -> object: ...
+def _compute_diff(current: object, previous: dict[str, Any] | None) -> object: ...
 
 
-def _compute_diff(current: object, previous: Optional[dict[str, Any]]) -> object:
+def _compute_diff(current: object, previous: dict[str, Any] | None) -> object:
     if isinstance(current, dict):
         current = cast(dict[str, Any], current)
         previous = previous or {}
@@ -47,7 +47,7 @@ def _compute_diff(current: object, previous: Optional[dict[str, Any]]) -> object
     return current if current is not None else ""
 
 
-def _serialize_list(array: Optional[list[Any]], previous: list[Any]) -> dict[str, Any]:
+def _serialize_list(array: list[Any] | None, previous: list[Any]) -> dict[str, Any]:
     array = array or []
     previous = previous or []
     params: dict[str, Any] = {}
@@ -70,15 +70,15 @@ class KhipuObject(dict[str, Any]):
             return super().default(o)
 
     _retrieve_params: Mapping[str, Any]
-    _previous: Optional[Mapping[str, Any]]
+    _previous: Mapping[str, Any] | None
 
     def __init__(
         self,
-        id: Optional[str] = None,
-        api_key: Optional[str] = None,
-        last_response: Optional[KhipuResponse] = None,
+        id: str | None = None,
+        api_key: str | None = None,
+        last_response: KhipuResponse | None = None,
         *,
-        _requestor: Optional["_APIRequestor"] = None,
+        _requestor: _APIRequestor | None = None,
         **params: Any,
     ):
         super().__init__()
@@ -106,7 +106,7 @@ class KhipuObject(dict[str, Any]):
         return self._requestor.api_key
 
     @property
-    def last_response(self) -> Optional[KhipuResponse]:
+    def last_response(self) -> KhipuResponse | None:
         return self._last_response
 
     # KhipuObject inherits from `dict` which has an update method, and this doesn't quite match
@@ -150,11 +150,10 @@ class KhipuObject(dict[str, Any]):
     def __setitem__(self, k: str, v: Any) -> None:
         if v == "":
             raise ValueError(
-                "You cannot set %s to an empty string on this object. "
+                f"You cannot set {k} to an empty string on this object. "
                 "The empty string is treated specially in our requests. "
-                "If you'd like to delete the property using the save() method on this object, you may set %s.%s=None. "
-                "Alternatively, you can pass %s='' to delete the property when using a resource method such as modify()."
-                % (k, str(self), k, k)
+                f"If you'd like to delete the property using the save() method on this object, you may set {self!s}.{k}=None. "
+                f"Alternatively, you can pass {k}='' to delete the property when using a resource method such as modify()."
             )
 
         # Allows for unpickling in Python 3.x
@@ -171,11 +170,11 @@ class KhipuObject(dict[str, Any]):
         except KeyError as err:
             if k in self._transient_values:
                 raise KeyError(
-                    "%r.  HINT: The %r attribute was set in the past."
+                    f"{k!r}.  HINT: The {k!r} attribute was set in the past."
                     "It was then wiped when refreshing the object with "
-                    "the result returned by Stripe's API, probably as a "
+                    "the result returned by Khipu's API, probably as a "
                     "result of a save().  The attributes currently "
-                    "available on this object are: %s" % (k, k, ", ".join(list(self.keys())))
+                    f"available on this object are: {', '.join(list(self.keys()))}"
                 )
             else:
                 raise err
@@ -211,8 +210,8 @@ class KhipuObject(dict[str, Any]):
     def construct_from(
         cls,
         values: dict[str, Any],
-        key: Optional[str],
-        last_response: Optional[KhipuResponse] = None,
+        key: str | None,
+        last_response: KhipuResponse | None = None,
         *,
         api_mode: ApiMode = "V3",
     ) -> Self:
@@ -230,8 +229,8 @@ class KhipuObject(dict[str, Any]):
         cls,
         *,
         values: dict[str, Any],
-        last_response: Optional[KhipuResponse] = None,
-        requestor: "_APIRequestor",
+        last_response: KhipuResponse | None = None,
+        requestor: _APIRequestor,
         api_mode: ApiMode,
     ) -> Self:
         instance = cls(
@@ -250,9 +249,9 @@ class KhipuObject(dict[str, Any]):
     def refresh_from(
         self,
         values: dict[str, Any],
-        api_key: Optional[str] = None,
-        partial: Optional[bool] = False,
-        last_response: Optional[KhipuResponse] = None,
+        api_key: str | None = None,
+        partial: bool | None = False,
+        last_response: KhipuResponse | None = None,
         *,
         api_mode: ApiMode = "V3",
     ) -> None:
@@ -272,17 +271,16 @@ class KhipuObject(dict[str, Any]):
         self,
         *,
         values: dict[str, Any],
-        partial: Optional[bool] = False,
-        last_response: Optional[KhipuResponse] = None,
-        requestor: Optional["_APIRequestor"] = None,
+        partial: bool | None = False,
+        last_response: KhipuResponse | None = None,
+        requestor: _APIRequestor | None = None,
         api_mode: ApiMode,
     ) -> None:
         self._requestor = requestor or self._requestor
         self._last_response = last_response or getattr(values, "_last_response", None)
 
-        # Wipe old state before setting new.  This is useful for e.g.
-        # updating a customer, where there is no persistent card
-        # parameter.  Mark those values which don't persist as transient
+        # Wipe old state before setting new. Mark those values which
+        # don't persist as transient.
         if partial:
             self._unsaved_values = self._unsaved_values - set(values)
         else:
@@ -316,7 +314,7 @@ class KhipuObject(dict[str, Any]):
                 }
             else:
                 obj = cast(
-                    Union[KhipuObject, list[KhipuObject]],
+                    KhipuObject | list[KhipuObject],
                     _util._convert_to_khipu_object(  # pyright: ignore[reportPrivateUsage]
                         resp=v,
                         params=None,
@@ -334,10 +332,10 @@ class KhipuObject(dict[str, Any]):
         self,
         method: Literal["get", "post", "delete"],
         url: str,
-        params: Optional[dict[str, Any]] = None,
+        params: dict[str, Any] | None = None,
         *,
         base_address: BaseAddress = "api",
-    ) -> "KhipuObject":
+    ) -> KhipuObject:
         return KhipuObject._request(
             self,
             method,
@@ -350,11 +348,11 @@ class KhipuObject(dict[str, Any]):
         self,
         method: Literal["get", "post", "delete"],
         url: str,
-        params: Optional[Mapping[str, Any]] = None,
-        usage: Optional[list[str]] = None,
+        params: Mapping[str, Any] | None = None,
+        usage: list[str] | None = None,
         *,
         base_address: BaseAddress,
-    ) -> "KhipuObject":
+    ) -> KhipuObject:
         if params is None:
             params = self._retrieve_params
 
@@ -376,13 +374,9 @@ class KhipuObject(dict[str, Any]):
             ident_parts.append(obj_str)
 
         if isinstance(self.get("id"), str):
-            ident_parts.append("id={}".format(self.get("id")))
+            ident_parts.append(f"id={self.get('id')}")
 
-        unicode_repr = "<{} at {}> JSON: {}".format(
-            " ".join(ident_parts),
-            hex(id(self)),
-            str(self),
-        )
+        unicode_repr = f"<{' '.join(ident_parts)} at {hex(id(self))}> JSON: {self!s}"
         return unicode_repr
 
     def __str__(self) -> str:
@@ -395,8 +389,8 @@ class KhipuObject(dict[str, Any]):
 
     def _to_dict_recursive(self) -> dict[str, Any]:
         def maybe_to_dict_recursive(
-            value: Optional[Union[KhipuObject, dict[str, Any]]],
-        ) -> Optional[dict[str, Any]]:
+            value: (KhipuObject | dict[str, Any]) | None,
+        ) -> dict[str, Any] | None:
             if value is None:
                 return None
             elif isinstance(value, KhipuObject):
@@ -413,7 +407,7 @@ class KhipuObject(dict[str, Any]):
             for key, value in dict(self).items()
         }
 
-    def serialize(self, previous: Optional[Mapping[str, Any]]) -> dict[str, Any]:
+    def serialize(self, previous: Mapping[str, Any] | None) -> dict[str, Any]:
         params: dict[str, Any] = {}
         unsaved_keys = self._unsaved_values or set()
         previous = previous or self._previous or {}
@@ -439,7 +433,7 @@ class KhipuObject(dict[str, Any]):
     # wholesale because some data that's returned from the API may not be valid
     # if it was set to be set manually. Here we override the class' copy
     # arguments so that we can bypass these possible exceptions on __setitem__.
-    def __copy__(self) -> "KhipuObject":
+    def __copy__(self) -> KhipuObject:
         copied = KhipuObject(
             self.get("id"),
             self.api_key,
@@ -459,7 +453,7 @@ class KhipuObject(dict[str, Any]):
     # wholesale because some data that's returned from the API may not be valid
     # if it was set to be set manually. Here we override the class' copy
     # arguments so that we can bypass these possible exceptions on __setitem__.
-    def __deepcopy__(self, memo: dict[int, Any]) -> "KhipuObject":
+    def __deepcopy__(self, memo: dict[int, Any]) -> KhipuObject:
         copied = self.__copy__()
         memo[id(self)] = copied
 
@@ -472,10 +466,10 @@ class KhipuObject(dict[str, Any]):
 
     _field_remappings: ClassVar[dict[str, str]] = {}
 
-    _inner_class_types: ClassVar[dict[str, type["KhipuObject"]]] = {}
+    _inner_class_types: ClassVar[dict[str, type[KhipuObject]]] = {}
     _inner_class_dicts: ClassVar[list[str]] = []
 
-    def _get_inner_class_type(self, field_name: str) -> Optional[type["KhipuObject"]]:
+    def _get_inner_class_type(self, field_name: str) -> type[KhipuObject] | None:
         return self._inner_class_types.get(field_name)
 
     def _get_inner_class_is_beneath_dict(self, field_name: str):

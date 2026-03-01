@@ -1,9 +1,8 @@
-from typing import Any, Optional, Union
+from typing import Any
 
 import khipu_tools
 from khipu_tools._api_mode import ApiMode
 from khipu_tools._api_requestor import _APIRequestor
-from khipu_tools._client_options import _ClientOptions
 from khipu_tools._error import AuthenticationError
 from khipu_tools._http_client import (
     HTTPClient,
@@ -22,21 +21,21 @@ class KhipuClient:
         self,
         api_key: str,
         *,
-        base_addresses: BaseAddresses = {},
-        http_client: Optional[HTTPClient] = None,
+        base_addresses: BaseAddresses | None = None,
+        http_client: HTTPClient | None = None,
     ):
 
         if api_key is None:
             raise AuthenticationError("No API key provided.")
 
-        base_addresses = {
+        resolved_addresses: BaseAddresses = {
             "api": khipu_tools.DEFAULT_API_BASE,
-            **base_addresses,
+            **(base_addresses or {}),
         }
 
         requestor_options = RequestorOptions(
             api_key=api_key,
-            base_addresses=base_addresses,
+            base_addresses=resolved_addresses,
         )
 
         if http_client is None:
@@ -49,13 +48,11 @@ class KhipuClient:
             client=http_client,
         )
 
-        self._options = _ClientOptions()
-
     def raw_request(self, method_: str, url_: str, **params):
         params = params.copy()
         options, params = extract_options_from_dict(params)
-        api_mode = get_api_mode(url_)
-        base_address = params.pop("api")
+        api_mode = get_api_mode()
+        base_address = params.pop("api", "api")
 
         rbody, rcode, rheaders = self._requestor.request_raw(
             method_,
@@ -64,15 +61,14 @@ class KhipuClient:
             options=options,
             base_address=base_address,
             api_mode=api_mode,
-            usage=["raw_request"],
         )
 
         return self._requestor._interpret_response(rbody, rcode, rheaders, api_mode)
 
     def deserialize(
         self,
-        resp: Union[KhipuResponse, dict[str, Any]],
-        params: Optional[dict[str, Any]] = None,
+        resp: KhipuResponse | dict[str, Any],
+        params: dict[str, Any] | None = None,
         *,
         api_mode: ApiMode,
     ) -> KhipuObject:

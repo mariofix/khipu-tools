@@ -1,32 +1,33 @@
-from typing import Any, Optional
+from __future__ import annotations
+
+from collections.abc import Mapping
+from typing import TYPE_CHECKING, Any
 
 from khipu_tools._api_mode import ApiMode
 from khipu_tools._khipu_object import KhipuObject
 from khipu_tools._util import merge_dicts
 
+if TYPE_CHECKING:
+    from khipu_tools._api_requestor import _APIRequestor
+    from khipu_tools._khipu_response import KhipuResponse
+
 
 class ErrorObject(KhipuObject):
-    charge: Optional[str]
-    code: Optional[str]
-    decline_code: Optional[str]
-    doc_url: Optional[str]
-    message: Optional[str]
-    param: Optional[str]
-    payment_intent: Optional[Any]
-    payment_method: Optional[Any]
-    setup_intent: Optional[Any]
-    source: Optional[Any]
+    code: str | None
+    doc_url: str | None
+    message: str | None
+    param: str | None
     type: str
 
     def refresh_from(
         self,
-        values,
-        api_key=None,
-        partial=False,
-        last_response=None,
+        values: dict[str, Any],
+        api_key: str | None = None,
+        partial: bool = False,
+        last_response: KhipuResponse | None = None,
         *,
         api_mode: ApiMode = "V3",
-    ):
+    ) -> None:
         return self._refresh_from(
             values=values,
             partial=partial,
@@ -42,10 +43,10 @@ class ErrorObject(KhipuObject):
     def _refresh_from(
         self,
         *,
-        values,
-        partial=False,
-        last_response=None,
-        requestor,
+        values: dict[str, Any],
+        partial: bool = False,
+        last_response: KhipuResponse | None = None,
+        requestor: _APIRequestor,
         api_mode: ApiMode,
     ) -> None:
         values = merge_dicts(
@@ -54,7 +55,6 @@ class ErrorObject(KhipuObject):
                 "doc_url": None,
                 "message": None,
                 "param": None,
-                "source": None,
                 "type": None,
             },
             values,

@@ -1,31 +1,31 @@
-from typing import Optional, Union, cast
+from typing import cast
 
 import khipu_tools  # noqa
 from khipu_tools._error_object import ErrorObject
 
 
 class KhipuError(Exception):
-    _message: Optional[str]
-    http_body: Optional[str]
-    http_status: Optional[int]
-    json_body: Optional[object]
-    headers: Optional[dict[str, str]]
-    code: Optional[str]
-    request_id: Optional[str]
-    error: Optional["ErrorObject"]
+    _message: str | None
+    http_body: str | None
+    http_status: int | None
+    json_body: object | None
+    headers: dict[str, str] | None
+    code: str | None
+    request_id: str | None
+    error: "ErrorObject | None"
 
     def __init__(
         self,
-        message: Optional[str] = None,
-        http_body: Optional[Union[bytes, str]] = None,
-        http_status: Optional[int] = None,
-        json_body: Optional[object] = None,
-        headers: Optional[dict[str, str]] = None,
-        code: Optional[str] = None,
+        message: str | None = None,
+        http_body: bytes | str | None = None,
+        http_status: int | None = None,
+        json_body: object | None = None,
+        headers: dict[str, str] | None = None,
+        code: str | None = None,
     ):
         super().__init__(message)
 
-        body: Optional[str] = None
+        body: str | None = None
         if http_body:
             # http_body can sometimes be a memoryview which must be cast
             # to a "bytes" before calling decode, so we check for the
@@ -33,8 +33,8 @@ class KhipuError(Exception):
             if hasattr(http_body, "decode"):
                 try:
                     body = cast(bytes, http_body).decode("utf-8")
-                except BaseException:
-                    body = "<Could not decode body as utf-8. " "Please report to mariofix@proton.me>"
+                except (UnicodeDecodeError, ValueError):
+                    body = "<Could not decode body as utf-8. Please open an issue at https://github.com/mariofix/khipu-tools/issues>"
             elif isinstance(http_body, str):
                 body = http_body
 
@@ -55,7 +55,7 @@ class KhipuError(Exception):
             return msg
 
     # Returns the underlying `Exception` (base class) message, which is usually
-    # the raw message returned by Stripe's API. This was previously available
+    # the raw message returned by Khipu's API. This was previously available
     # in python2 via `error.message`. Unlike `str(error)`, it omits "Request
     # req_..." from the beginning of the string.
     @property
@@ -63,14 +63,12 @@ class KhipuError(Exception):
         return self._message
 
     def __repr__(self):
-        return "{}(message={!r}, http_status={!r}, request_id={!r})".format(
-            self.__class__.__name__,
-            self._message,
-            self.http_status,
-            self.request_id,
+        return (
+            f"{self.__class__.__name__}(message={self._message!r},"
+            f" http_status={self.http_status!r}, request_id={self.request_id!r})"
         )
 
-    def _construct_error_object(self) -> Optional[ErrorObject]:
+    def _construct_error_object(self) -> "ErrorObject | None":
         if (
             self.json_body is None
             or not isinstance(self.json_body, dict)
@@ -83,8 +81,6 @@ class KhipuError(Exception):
         return ErrorObject._construct_from(
             values=self.json_body["error"],
             requestor=khipu_tools._APIRequestor._global_instance(),
-            # We pass in API mode as "V1" here because it's required,
-            # but ErrorObject is reused for both V1 and V2 errors.
             api_mode="V3",
         )
 
@@ -112,29 +108,10 @@ class APIConnectionError(KhipuError):
 
 class KhipuErrorWithParamCode(KhipuError):
     def __repr__(self):
-        return "%s(message=%r, param=%r, code=%r, http_status=%r, " "request_id=%r)" % (
-            self.__class__.__name__,
-            self._message,
-            self.param,  # pyright: ignore
-            self.code,
-            self.http_status,
-            self.request_id,
+        return (
+            f"{self.__class__.__name__}(message={self._message!r}, param={self.param!r},"  # pyright: ignore
+            f" code={self.code!r}, http_status={self.http_status!r}, request_id={self.request_id!r})"
         )
-
-
-class CardError(KhipuErrorWithParamCode):
-    def __init__(
-        self,
-        message,
-        param,
-        code,
-        http_body=None,
-        http_status=None,
-        json_body=None,
-        headers=None,
-    ):
-        super().__init__(message, http_body, http_status, json_body, headers, code)
-        self.param = param
 
 
 class IdempotencyError(KhipuError):

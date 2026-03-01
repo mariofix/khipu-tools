@@ -1,23 +1,22 @@
-from typing import Optional
-
 import khipu_tools
 from khipu_tools._base_address import BaseAddresses
 
 
 class RequestorOptions:
-    api_key: Optional[str]
+    api_key: str | None
     base_addresses: BaseAddresses
 
     def __init__(
         self,
-        api_key: Optional[str] = None,
-        base_addresses: BaseAddresses = {},
+        api_key: str | None = None,
+        base_addresses: BaseAddresses | None = None,
     ):
         self.api_key = api_key
         self.base_addresses = {}
 
-        if base_addresses.get("api"):
-            self.base_addresses["api"] = base_addresses.get("api")
+        ba = base_addresses or {}
+        if ba.get("api"):
+            self.base_addresses["api"] = ba.get("api")
 
     def to_dict(self):
         return {

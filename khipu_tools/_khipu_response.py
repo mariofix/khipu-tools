@@ -1,5 +1,4 @@
 import json
-from collections import OrderedDict
 from collections.abc import Mapping
 
 
@@ -19,4 +18,4 @@ class KhipuResponse(KhipuResponseBase):
     def __init__(self, body: str, code: int, headers: Mapping[str, str]):
         KhipuResponseBase.__init__(self, code, headers)
         self.body = body
-        self.data = json.loads(body, object_pairs_hook=OrderedDict)
+        self.data = json.loads(body)
