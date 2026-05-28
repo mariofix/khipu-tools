@@ -1,15 +1,14 @@
+from khipu_tools._error import APIConnectionError
+from typing_extensions import Never
+from requests import Session as RequestsSession
+import requests
+from typing import Any, ClassVar, Literal, NoReturn, TypedDict, cast, overload
+from collections.abc import Mapping
 import secrets
 import textwrap
 import threading
 
 _system_random = secrets.SystemRandom()
-from collections.abc import Mapping
-from typing import Any, ClassVar, Literal, NoReturn, TypedDict, cast, overload
-
-import requests
-from requests import Session as RequestsSession
-from typing_extensions import Never
-from khipu_tools._error import APIConnectionError
 
 
 def new_default_http_client(**kwargs: Any) -> "HTTPClient":
